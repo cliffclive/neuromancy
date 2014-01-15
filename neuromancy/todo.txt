@@ -1,0 +1,23 @@
+DONE:
++ sigmoid, sigmoid gradient
++ randomize weights (initialize network)
++ feed forward (predict)
++ calculate deltas (errors)
++ calculate gradients
++ update weights
++ calculate cost
++ learn weights (loop over the preceding 5 functions)
+
+
+TODO:
+- upload to GitHub
+- redesign, refactor
+- set up some unit tests (i.e., move tests from __main__ into their own files)
+
+- train with fmincg instead of gradient descent
+- implement cross validation
+- plot learning curves
+- anomaly detection
+
+- display weights as a heat map
+- display images from test set
