@@ -19,6 +19,9 @@ def sigmoid_gradient(array):
 
 
 def add_bias(array):
+    """
+    Adds a column of ones to an array.
+    """
     bias = np.ones((array.shape[0], 1))
     return np.hstack((bias, array))
 
@@ -36,7 +39,16 @@ def binarize_categories(targets, categories):
 
 
 class FeedForwardBackPropNetwork:
+    """
+    A standard feed forward back propagation neural network with any number of 
+    hidden layers and hidden layer sizes (subject to computer memory constraints).
+    """
     def __init__(self, n_features, n_classes, hidden_layer_sizes, learning_rate, regularization=0):
+        """
+        n_features and n_classes must be integers
+        hidden_layer_sizes is a vector of integers that define the size of each hidden layer
+        learning_rate and regularization are both floats
+        """
         self.n_features = n_features
         self.n_classes = n_classes
         self.n_layers = len(hidden_layer_sizes) + 2
@@ -50,6 +62,10 @@ class FeedForwardBackPropNetwork:
         self.regularization = regularization
 
     def randomize_weights(self):
+        """
+        Construct weight matrices to transition between each layer of the network.
+        Initialize the matrices with small random values.
+        """
         sizes = [self.n_features] + self.hidden_layer_sizes + [self.n_classes]
         weights = []
         for l in range(len(sizes)-1):
@@ -60,6 +76,12 @@ class FeedForwardBackPropNetwork:
         return weights
 
     def feed_forward(self, inputs):
+        """
+        Feed an input vector forward through the network.
+        A layer's signal is the input it receives.
+        A layer's activation is the squashed transformation of its signal.
+        The final layer of activations is the probability assigned to each class.
+        """
         self.signals = [inputs]
         self.activations = [inputs]
         for wt in self.weights:
@@ -69,27 +91,49 @@ class FeedForwardBackPropNetwork:
             self.activations.append(activation)
 
     def count_observations(self):
+        """
+        Count the number of observations in the input data.
+        """
         return self.activations[0].shape[0]
 
     def probabilities(self):
+        """
+        Returns, for each observation, the probability of each output category.
+        """
         return self.activations[-1]
 
     def calculate_deltas(self, targets):
+        """
+        Calculate the deltas, which in the final layer represent the error
+        between the output probabilities and the training target.  In middle
+        layers the deltas represent the portion of the error that is 
+        attributable to each weight parameter.
+        """
         self.deltas[-1] = self.probabilities() - targets
         for i in reversed(range(self.n_layers - 1)):
             self.deltas[i] = ((self.deltas[i+1].dot(self.weights[i].transpose())) *
                               add_bias(sigmoid_gradient(self.signals[i])))[:, 1:]
 
     def calculate_gradients(self):
+        """
+        Calculate the gradient of the total cost function for each weight parameter.
+        """
         for i in range(len(self.gradients)):
             self.gradients[i] = (add_bias(self.activations[i]).transpose()).dot(self.deltas[i+1])
             self.gradients[i] /= self.count_observations()
 
     def update_weights(self):
+        """
+        Update the parameter weights by descending along their gradients in the cost function.
+        """
         for i in range(len(self.weights)):
             self.weights[i] -= self.learning_rate * self.gradients[i]
 
     def calculate_cost(self, targets):
+        """
+        Calculate the cost of the network, measured in terms of the prediction errors,
+        plus the regularization cost, which penalizes the size of the weight parameters.
+        """
         n = self.count_observations()
         outputs = self.probabilities()
         base_cost = (-targets * np.log(outputs) -
@@ -99,10 +143,18 @@ class FeedForwardBackPropNetwork:
         return base_cost + reg_cost
 
     def predict(self, inputs):
+        """
+        Given a set of input data, returns the network's best guess at the output
+        category for each observation.
+        """
         self.feed_forward(inputs)
         return np.argmax(self.probabilities(), 1)
 
     def learn_weights(self, data, targets, tolerance=0.0001, max_iter=10000, show_progress=False):
+        """
+        Given a set of input data and output targets, uses the gradient descent
+        algorithm to train the weight parameters of the network.
+        """
         self.feed_forward(data)
         cost = self.calculate_cost(targets)
         print "Initial Cost: ", cost
