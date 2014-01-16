@@ -215,7 +215,6 @@ if __name__ == "__main__":
     hidden = [4, 3]
     ffbp_net = FeedForwardBackPropNetwork(f, k, hidden, a, r)
 
-    """
     ffbp_net.feed_forward(X1)
     print "Cost(1): ", ffbp_net.calculate_cost(Y1)
 
@@ -225,57 +224,13 @@ if __name__ == "__main__":
 
     ffbp_net.feed_forward(X1)
     print "Cost(2): ", ffbp_net.calculate_cost(Y1)
-    """
 
     ffbp_net.learn_weights(X1, Y1, 0.00001, 1000)
 
-    """
     # Make sure it works with a different sized training set
     ffbp_net.feed_forward(X2)
     ffbp_net.calculate_deltas(Y2)
     print ffbp_net.deltas[-1]
     print "Cost(2): ", ffbp_net.calculate_cost(Y2)
-    """
-    
-    # End unit tests
-    
-    # Begin Kaggle tests
 
-    print "\n\nTesting on MNIST data..."
-    import pandas as pd
-
-    print "Reading data..."
-    batch_size = 1000
-    data_dir = "C:/Users/Clive/Dropbox/code/pynets/pynets/Data/"
-    train_file = pd.read_csv(data_dir + "train.csv", chunksize=batch_size)
-    train = train_file.get_chunk()
-    digits = dict(zip(range(10), range(10)))
-    Y = binarize_categories(train['label'], digits)
-    X = np.array(train.ix[:, 1:])
-
-    print "Building network..."
-    f = X.shape[1]
-    k = Y.shape[1]
-    a = 0.2
-    r = 1
-    hidden = [100, 50, 50, 100]
-    digits_net = FeedForwardBackPropNetwork(f, k, hidden, a, r)
-
-    print "Training network..."
-    digits_net.learn_weights(X, Y, 0.00001, 1000)
-    i=1
-    while True:
-        try:
-            train = train_file.get_chunk()
-        except StopIteration:
-            break
-        Y = binarize_categories(train['label'], digits)
-        X = np.array(train.ix[:, 1:])
-        digits_net.learn_weights(X, Y, 0.00001, 1000, show_progress=False)
-        
-    test_file = pd.read_csv(data_dir + "test.csv")
-    X = np.array(test_file)
-    pred = digits_net.predict(X)
-    pred = pd.DataFrame(pred)
-    pred.to_csv(data_dir + "predictions.csv")
 

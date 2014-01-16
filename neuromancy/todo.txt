@@ -10,14 +10,17 @@ DONE:
 
 
 TODO:
-- upload to GitHub
-- redesign, refactor
+- create a mini-batch learning function
 - set up some unit tests (i.e., move tests from __main__ into their own files)
-
 - train with fmincg instead of gradient descent
-- implement cross validation
-- plot learning curves
-- anomaly detection
 
-- display weights as a heat map
-- display images from test set
+- focus on good ML practices:
+	- implement cross validation
+	- plot learning curves
+	- run error diagnostics
+	- optimize learning rate and regularization coefficient
+	- anomaly detection?
+
+- fun stuff:
+	- display weights as a heat map
+	- display images from test set
