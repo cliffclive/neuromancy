@@ -304,6 +304,7 @@ def sgd_optimization_mnist(learning_rate=0.13, n_epochs=1000,
     # TRAIN MODEL #
     ###############
     print '... training the model'
+
     # early-stopping parameters
     patience = 5000  # look as this many examples regardless
     patience_increase = 2  # wait this much longer when a new best is
@@ -321,8 +322,9 @@ def sgd_optimization_mnist(learning_rate=0.13, n_epochs=1000,
     test_score = 0.
     start_time = time.clock()
 
-    done_looping = False
     epoch = 0
+    done_looping = False
+
     while (epoch < n_epochs) and (not done_looping):
         epoch = epoch + 1
         for minibatch_index in xrange(n_train_batches):
@@ -333,8 +335,8 @@ def sgd_optimization_mnist(learning_rate=0.13, n_epochs=1000,
 
             if (iter + 1) % validation_frequency == 0:
                 # compute zero-one loss on validation set
-                validation_losses = [validate_model(i)
-                                     for i in xrange(n_valid_batches)]
+                validation_losses = [validate_model(i) for i
+                                     in xrange(n_valid_batches)]
                 this_validation_loss = numpy.mean(validation_losses)
 
                 print('epoch %i, minibatch %i/%i, validation error %f %%' % \

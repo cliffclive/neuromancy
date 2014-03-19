@@ -78,8 +78,7 @@ class LeNetConvPoolLayer(object):
         W_bound = numpy.sqrt(6. / (fan_in + fan_out))
         self.W = theano.shared(numpy.asarray(
             rng.uniform(low=-W_bound, high=W_bound, size=filter_shape),
-            dtype=theano.config.floatX),
-                               borrow=True)
+            dtype=theano.config.floatX), borrow=True)
 
         # the bias is a 1D tensor -- one bias per output feature map
         b_values = numpy.zeros((filter_shape[0],), dtype=theano.config.floatX)
@@ -87,7 +86,7 @@ class LeNetConvPoolLayer(object):
 
         # convolve input feature maps with filters
         conv_out = conv.conv2d(input=input, filters=self.W,
-                filter_shape=filter_shape, image_shape=image_shape)
+                               filter_shape=filter_shape, image_shape=image_shape)
 
         # downsample each feature map individually, using maxpooling
         pooled_out = downsample.max_pool_2d(input=conv_out,
