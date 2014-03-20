@@ -126,6 +126,7 @@ class LogisticRegression(object):
         """
 
         # check if y has same dimension of y_pred
+        # what is 'target.type'?
         if y.ndim != self.y_pred.ndim:
             raise TypeError('y should have the same shape as self.y_pred',
                             ('y', target.type, 'y_pred', self.y_pred.type))
