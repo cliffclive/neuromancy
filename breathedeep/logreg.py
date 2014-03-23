@@ -377,6 +377,35 @@ def sgd_optimization_mnist(learning_rate=0.13, n_epochs=1000,
                           os.path.split(__file__)[1] +
                           ' ran for %.2fm' % ((end_time - start_time) / 60.))
 
+    return classifier
+
 
 if __name__ == '__main__':
-    sgd_optimization_mnist()
+    mnist_logreg = sgd_optimization_mnist(dataset='mnist.pkl.gz')
+
+
+"""
+kaggle_data = open('data/train.csv').readlines()[1:]
+kaggle_data = [line.rstrip().split(',') for line in kaggle_data]
+
+for i in range(len(kaggle_data)):
+    kaggle_data[i] = [int(x) for x in kaggle_data[i]]
+
+kaggle_outputs = [data[0] for data in kaggle_data]
+kaggle_inputs = [data[1:] for data in kaggle_data]
+
+kaggle_preds = mnist_logreg.y_pred(kaggle_inputs)  ## DOES NOT WORK!!
+
+TODO:
+Convert sgd_optimization_mnist into a Trainer class that accepts any classifier
+and any dataset in the appropriate format. Use the "Build Model" routine in the
+__init__ method, and use "Train Model"  as a method to, yes, train the model.
+
+When the training method is finished, return the trained classifier as an object
+that can be used to classify new data sets. Also write methods to save and load
+classifiers, and to update classifiers that have previously been trained with
+other data.
+
+Finally, implement a way to train on streaming data, instead of data sets that are
+loaded into memory all at once.
+"""
