@@ -4,6 +4,7 @@ import theano
 import numpy
 
 import theano.tensor as T
+
 from theano.tensor.signal import downsample
 from theano.tensor.nnet import conv
 
@@ -33,11 +34,11 @@ class NeuralLayer(object):
 
         # L1 norm ; one regularization option is to enforce L1 norm to
         # be small
-        self.L1 = abs(self.W).sum()
+        self.L1_norm = abs(self.W).sum()
 
         # square of L2 norm ; one regularization option is to enforce
         # square of L2 norm to be small
-        self.L2_sqr = (self.W ** 2).sum()
+        self.L2_norm = (self.W ** 2).sum()
 
 
 class LogisticLayer(NeuralLayer):
@@ -71,8 +72,8 @@ class LogisticLayer(NeuralLayer):
         super(LogisticLayer, self).__init__(input, W, b, activation)
 
 
-class HiddenLayer(NeuralLayer):
-    def __init__(self, rng, input, n_in, n_out, W=None, b=None,
+class PerceptronLayer(NeuralLayer):
+    def __init__(self, input, n_in, n_out, seed=None, W=None, b=None,
                  activation=T.tanh):
         """
         Typical hidden layer of a MLP: units are fully-connected and have
@@ -83,8 +84,8 @@ class HiddenLayer(NeuralLayer):
 
         Hidden unit activation is given by: tanh(dot(input,W) + b)
 
-        :type rng: numpy.random.RandomState
-        :param rng: a random number generator used to initialize weights
+        :type seed: int
+        :param seed: used to initialize a random number generator used to initialize weights
 
         :type input: theano.tensor.dmatrix
         :param input: a symbolic tensor of shape (n_examples, n_in)
@@ -100,6 +101,8 @@ class HiddenLayer(NeuralLayer):
                            layer
         """
 
+        rng = numpy.random.RandomState(seed)
+
         # `W` is initialized with `W_values` which is uniformely sampled
         # from sqrt(-6./(n_in+n_hidden)) and sqrt(6./(n_in+n_hidden))
         # for tanh activation function
@@ -114,9 +117,9 @@ class HiddenLayer(NeuralLayer):
         #        tanh.
         if W is None:
             W_values = numpy.asarray(rng.uniform(
-                    low=-numpy.sqrt(6. / (n_in + n_out)),
-                    high=numpy.sqrt(6. / (n_in + n_out)),
-                    size=(n_in, n_out)), dtype=theano.config.floatX)
+                low=-numpy.sqrt(6. / (n_in + n_out)),
+                high=numpy.sqrt(6. / (n_in + n_out)),
+                size=(n_in, n_out)), dtype=theano.config.floatX)
             if activation == theano.tensor.nnet.sigmoid:
                 W_values *= 4
 
@@ -126,18 +129,18 @@ class HiddenLayer(NeuralLayer):
             b_values = numpy.zeros((n_out,), dtype=theano.config.floatX)
             b = theano.shared(value=b_values, name='b', borrow=True)
 
-        super(HiddenLayer, self).__init__(input, W, b, activation)
+        super(PerceptronLayer, self).__init__(input, W, b, activation)
 
 
 class LeNetConvPoolLayer(object):
     """Pool Layer of a convolutional network """
 
-    def __init__(self, rng, input, filter_shape, image_shape, poolsize=(2, 2)):
+    def __init__(self, input, filter_shape, image_shape, poolsize=(2, 2), seed=None):
         """
         Allocate a LeNetConvPoolLayer with shared variable internal parameters.
 
-        :type rng: numpy.random.RandomState
-        :param rng: a random number generator used to initialize weights
+        :type seed: int
+        :param seed: used to initialize a random number generator used to initialize weights
 
         :type input: theano.tensor.dtensor4
         :param input: symbolic image tensor, of shape image_shape
@@ -155,6 +158,8 @@ class LeNetConvPoolLayer(object):
         """
 
         assert image_shape[1] == filter_shape[1]
+
+        rng = numpy.random.RandomState(seed)
 
         # there are "num input feature maps * filter height * filter width"
         # inputs to each hidden unit

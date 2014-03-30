@@ -11,10 +11,14 @@ import theano.tensor as T
 
 class SGDTrainer(object):
     def __init__(self, classifier, datasets,
-                 learning_rate=0.13, n_epochs=1000, batch_size=600):
+                 learning_rate=0.13, L1_reg=0, L2_reg=0,
+                 n_epochs=1000, batch_size=600):
         self.train_set_x, self.train_set_y = datasets[0]
         self.valid_set_x, self.valid_set_y = datasets[1]
         self.test_set_x, self.test_set_y = datasets[2]
+
+        self.L1_reg = L1_reg
+        self.L2_reg = L2_reg
 
         # compute number of minibatches for training, validation and testing
         self.n_train_batches = self.train_set_x.get_value(borrow=True).shape[0] / batch_size
@@ -51,7 +55,7 @@ class SGDTrainer(object):
         # the cost we minimize during training is the negative log likelihood
         # of the model plus the regularization terms (L1 and L2);
         # cost is expressed here symbolically
-        cost = self.classifier.negative_log_likelihood(y)
+        cost = self.classifier.cost(y, L1_reg, L2_reg)
 
         # compute the gradient of cost with respect to theta = (W,b)
         g_W = T.grad(cost=cost, wrt=self.classifier.W)
