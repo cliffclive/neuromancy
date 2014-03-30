@@ -41,7 +41,7 @@ import theano
 import theano.tensor as T
 
 from sgd_trainer import SGDTrainer
-from neural_net import LogisticRegression, MLP
+from neural_net import LogisticRegression, MLP, LeNet5
 
 
 def load_data(dataset):
@@ -141,10 +141,27 @@ def sgd_optimize_mlp(dataset='mnist.pkl.gz'):
     return trainer.train()
 
 
+def sgd_optimize_lenet(dataset='mnist.pkl.gz'):
+    x = T.matrix('x')    # the data is presented as rasterized images
+    y = T.ivector('y')   # the labels are presented as 1D vector of [int] labels
+    batch_size = 500
+
+    classifier = LeNet5(input=x, nkerns=[20, 50], filter_shapes=[[5, 5], [5, 5]],
+                        image_shapes=[[28, 28], [12, 12]], batch_size=batch_size,
+                        n_hidden=500, n_out=10)
+
+    datasets = load_data(dataset)
+    trainer = SGDTrainer(classifier, datasets, learning_rate=0.01, L1_reg=0.0001,
+                         L2_reg=0.001, n_epochs=500, batch_size=batch_size)
+    trainer.build(x, y)
+    return trainer.train()
+
+
 if __name__ == '__main__':
     dataset='mnist.pkl.gz'
     #logreg_classifier = sgd_optimize_logreg(dataset)
-    mlp_classifier = sgd_optimize_mlp(dataset)
+    #mlp_classifier = sgd_optimize_mlp(dataset)
+    lenet_classifier = sgd_optimize_lenet(dataset)
 
 
 """

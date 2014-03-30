@@ -109,3 +109,28 @@ class MLP(NeuralNet):
         logreg_layer = neural_layer.LogisticLayer(input=hidden_layer.output,
                                                   n_in=n_hidden, n_out=n_out)
         super(MLP, self).__init__([hidden_layer, logreg_layer])
+
+
+class LeNet5(NeuralNet):
+    """
+    Convolutional neural network with 2 conv/pool layers and 1 perceptron layer.
+    """
+    def __init__(self, input, nkerns, filter_shapes, image_shapes, batch_size, n_hidden, n_out):
+        input0 = input.reshape((batch_size, 1, 28, 28))
+        cp_layer0 = neural_layer.LeNetConvPoolLayer(
+            input0,
+            filter_shape=(nkerns[0], 1, filter_shapes[0][0], filter_shapes[0][1]),
+            image_shape=(batch_size, 1, image_shapes[0][0], image_shapes[0][1]),
+            poolsize=(2, 2))
+        cp_layer1 = neural_layer.LeNetConvPoolLayer(
+            cp_layer0.output,
+            filter_shape=(nkerns[1], nkerns[0], filter_shapes[1][0], filter_shapes[1][1]),
+            image_shape=(batch_size, nkerns[0], image_shapes[1][0], image_shapes[1][1]),
+            poolsize=(2, 2))
+        hidden_layer = neural_layer.PerceptronLayer(input=cp_layer1.output.flatten(2),
+                                                    n_in=nkerns[1] * 4 * 4,
+                                                    n_out=n_hidden)
+        logreg_layer = neural_layer.LogisticLayer(input=hidden_layer.output,
+                                                  n_in=n_hidden, n_out=n_out)
+        super(LeNet5, self).__init__([cp_layer0, cp_layer1, hidden_layer, logreg_layer])
+
