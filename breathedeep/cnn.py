@@ -262,7 +262,6 @@ def evaluate_lenet5(learning_rate=0.1, n_epochs=200,
 
             if iter % 100 == 0:
                 print 'training @ iter = ', iter
-            cost_ij = train_model(minibatch_index)
 
             if (iter + 1) % validation_frequency == 0:
                 # compute zero-one loss on validation set

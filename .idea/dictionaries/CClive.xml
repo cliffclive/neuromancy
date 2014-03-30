@@ -1,3 +1,10 @@
 <component name="ProjectDictionaryState">
-  <dictionary name="CClive" />
+  <dictionary name="CClive">
+    <words>
+      <w>minibatch</w>
+      <w>minibatches</w>
+      <w>mnist</w>
+      <w>theano</w>
+    </words>
+  </dictionary>
 </component>
