@@ -132,7 +132,7 @@ class PerceptronLayer(NeuralLayer):
         super(PerceptronLayer, self).__init__(input, W, b, activation)
 
 
-class LeNetConvPoolLayer(object):
+class LeNetConvPoolLayer(NeuralLayer):
     """Pool Layer of a convolutional network """
 
     def __init__(self, input, filter_shape, image_shape, poolsize=(2, 2), seed=None):

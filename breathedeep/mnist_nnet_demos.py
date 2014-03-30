@@ -152,7 +152,7 @@ def sgd_optimize_lenet(dataset='mnist.pkl.gz'):
 
     datasets = load_data(dataset)
     trainer = SGDTrainer(classifier, datasets, learning_rate=0.01, L1_reg=0.0001,
-                         L2_reg=0.001, n_epochs=500, batch_size=batch_size)
+                         L2_reg=0.001, n_epochs=100, batch_size=batch_size)
     trainer.build(x, y)
     return trainer.train()
 
