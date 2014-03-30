@@ -2,10 +2,9 @@ __author__ = 'CClive'
 
 import theano
 import numpy
+import neural_layer
 
 import theano.tensor as T
-
-from neural_layer import NeuralLayer
 
 class NeuralNet(object):
     """
@@ -25,6 +24,8 @@ class NeuralNet(object):
             self.params += layer.params
             self.L1_norm += layer.L1_norm
             self.L2_norm += layer.L2_norm
+        self.L1_norm = self.L1_norm.sum()
+        self.L2_norm = self.L2_norm.sum()
 
         self.prediction = T.argmax(self.output, axis=1)
 
@@ -76,13 +77,35 @@ class NeuralNet(object):
 
         # check if y has same dimension of y_pred
         # what is 'target.type'?
-        if y.ndim != self.y_pred.ndim:
+        if y.ndim != self.prediction.ndim:
             raise TypeError('y should have the same shape as self.y_pred',
                             ('y', y.type, 'y_pred', self.y_pred.type))
         # check if y is of the correct datatype
         if y.dtype.startswith('int'):
             # the T.neq operator returns a vector of 0s and 1s, where 1
             # represents a mistake in prediction
-            return T.mean(T.neq(self.y_pred, y))
+            return T.mean(T.neq(self.prediction, y))
         else:
             raise NotImplementedError()
+
+
+class LogisticRegression(NeuralNet):
+    """
+    A logistic regression is a trivial neural net that only has a single logistic layer.
+    """
+    def __init__(self, input, n_in, n_out):
+        logreg_layer = neural_layer.LogisticLayer(input, n_in, n_out)
+        super(LogisticRegression, self).__init__([logreg_layer])
+
+
+class MLP(NeuralNet):
+    """
+    Multi-Layer Perceptron class with one hidden layer.
+    TODO: generalize this to make it easy to create an arbitrary number of
+    hidden layers, of arbitrary size.
+    """
+    def __init__(self, input, n_in, n_hidden, n_out):
+        hidden_layer = neural_layer.PerceptronLayer(input, n_in, n_hidden)
+        logreg_layer = neural_layer.LogisticLayer(input=hidden_layer.output,
+                                                  n_in=n_hidden, n_out=n_out)
+        super(MLP, self).__init__([hidden_layer, logreg_layer])

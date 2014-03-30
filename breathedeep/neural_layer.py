@@ -73,8 +73,8 @@ class LogisticLayer(NeuralLayer):
 
 
 class PerceptronLayer(NeuralLayer):
-    def __init__(self, input, n_in, n_out, seed=None, W=None, b=None,
-                 activation=T.tanh):
+    def __init__(self, input, n_in, n_out, W=None, b=None,
+                 activation=T.tanh, seed=None):
         """
         Typical hidden layer of a MLP: units are fully-connected and have
         sigmoidal activation function. Weight matrix W is of shape (n_in,n_out)

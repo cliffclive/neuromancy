@@ -55,16 +55,19 @@ class SGDTrainer(object):
         # the cost we minimize during training is the negative log likelihood
         # of the model plus the regularization terms (L1 and L2);
         # cost is expressed here symbolically
-        cost = self.classifier.cost(y, L1_reg, L2_reg)
+        cost = self.classifier.cost(y, self.L1_reg, self.L2_reg)
 
         # compute the gradient of cost with respect to theta = (W,b)
-        g_W = T.grad(cost=cost, wrt=self.classifier.W)
-        g_b = T.grad(cost=cost, wrt=self.classifier.b)
+        gparams = []
+        for param in self.classifier.params:
+            gparam = T.grad(cost, param)
+            gparams.append(gparam)
 
         # specify how to update the parameters of the model as a list of
         # (variable, update expression) pairs.
-        updates = [(self.classifier.W, self.classifier.W - self.learning_rate * g_W),
-                   (self.classifier.b, self.classifier.b - self.learning_rate * g_b)]
+        updates = []
+        for param, gparam in zip(self.classifier.params, gparams):
+            updates.append((param, param - self.learning_rate * gparam))
 
         # compiling a Theano function `train_model` that returns the cost, but
         # in the same time updates the parameter of the model based on the rules
