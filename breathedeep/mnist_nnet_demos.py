@@ -44,6 +44,8 @@ from sgd_trainer import SGDTrainer
 from neural_net import LogisticRegression, MLP, LeNet5
 
 
+# move this function into another file; probably into formatter.py,
+# but then formatter.py would need to be renamed (which is fine)
 def load_data(dataset):
     ''' Loads the dataset
     :type dataset: string

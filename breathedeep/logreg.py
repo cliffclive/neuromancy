@@ -169,12 +169,12 @@ def load_data(dataset):
     f = gzip.open(dataset, 'rb')
     train_set, valid_set, test_set = cPickle.load(f)
     f.close()
-    #train_set, valid_set, test_set format: tuple(input, target)
-    #input is an numpy.ndarray of 2 dimensions (a matrix)
-    #witch row's correspond to an example. target is a
-    #numpy.ndarray of 1 dimensions (vector)) that have the same length as
-    #the number of rows in the input. It should give the target
-    #target to the example with the same index in the input.
+    # train_set, valid_set, test_set format: tuple(input, target)
+    # -> input is an numpy.ndarray of 2 dimensions (a matrix)
+    #    with each row providing one example.
+    # -> target is a numpy.ndarray of 1 dimension (vector) that has
+    #    the same length as the number of rows in the input.
+    # Each target corresponds with the example with the same index in the input.
 
 
     def shared_dataset(data_xy, borrow=True):
@@ -187,12 +187,12 @@ def load_data(dataset):
         variable) would lead to a large decrease in performance.
         """
         data_x, data_y = data_xy
-        shared_x = theano.shared(numpy.asarray(data_x,
-                                               dtype=theano.config.floatX),
-                                 borrow=borrow)
-        shared_y = theano.shared(numpy.asarray(data_y,
-                                               dtype=theano.config.floatX),
-                                 borrow=borrow)
+        shared_x = theano.shared(
+            numpy.asarray(data_x, dtype=theano.config.floatX),
+            borrow=borrow)
+        shared_y = theano.shared(
+            numpy.asarray(data_y, dtype=theano.config.floatX),
+            borrow=borrow)
         # When storing data on the GPU it has to be stored as floats
         # therefore we will store the labels as ``floatX`` as well
         # (``shared_y`` does exactly that). But during our computations
@@ -381,30 +381,5 @@ def sgd_optimization_mnist(learning_rate=0.13, n_epochs=1000,
 
 if __name__ == '__main__':
     mnist_logreg = sgd_optimization_mnist(dataset='mnist.pkl.gz')
+    #kaggle_logreg = sgd_optimization_mnist(dataset='small_kaggle.pkl.gz')
 
-
-"""
-kaggle_data = open('data/train.csv').readlines()[1:]
-kaggle_data = [line.rstrip().split(',') for line in kaggle_data]
-
-for i in range(len(kaggle_data)):
-    kaggle_data[i] = [int(x) for x in kaggle_data[i]]
-
-kaggle_outputs = [data[0] for data in kaggle_data]
-kaggle_inputs = [data[1:] for data in kaggle_data]
-
-kaggle_preds = mnist_logreg.y_pred(kaggle_inputs)  ## DOES NOT WORK!!
-
-TODO:
-Convert sgd_optimization_mnist into a Trainer class that accepts any classifier
-and any dataset in the appropriate format. Use the "Build Model" routine in the
-__init__ method, and use "Train Model"  as a method to, yes, train the model.
-
-When the training method is finished, return the trained classifier as an object
-that can be used to classify new data sets. Also write methods to save and load
-classifiers, and to update classifiers that have previously been trained with
-other data.
-
-Finally, implement a way to train on streaming data, instead of data sets that are
-loaded into memory all at once.
-"""
