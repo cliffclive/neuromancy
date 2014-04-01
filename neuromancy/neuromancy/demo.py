@@ -5,7 +5,8 @@ Created on Jan 16, 2014
 '''
 
 import pandas as pd
-from neuromancy import FeedForwardBackPropNetwork
+import numpy as np
+from neuromancy import FeedForwardBackPropNetwork, binarize_categories
 
 if __name__ == "__main__":
     
@@ -28,7 +29,7 @@ if __name__ == "__main__":
     k = Y.shape[1]
     a = 0.2
     r = 1
-    hidden = [100, 50, 50, 100]
+    hidden = [800, 500, 500, 800]
     digits_net = FeedForwardBackPropNetwork(f, k, hidden, a, r)
 
     print "Training network..."
