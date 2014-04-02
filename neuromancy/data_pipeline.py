@@ -9,7 +9,16 @@ import os
 import theano.tensor as T
 
 
-def convert_csv(infile, outfile):
+def convert_labeled_csv_data(infile, outfile):
+    # Only do it this way when the data set is to big to pickle all at once,
+    # (but still small enough to pickle in three batches).
+    # This isn't the smartest approach; we still have the case where we can
+    # pickle all sets in a single tuple, and the case where each set is still
+    # to big to pickle. These require a single pickle dump, and a streaming
+    # pickle dump, respectively. Or we can just focus on three pickles and a
+    # streaming pickle. But the mnist data set from the deeplearning site is
+    # bigger than the kaggle one. So there must be a way to pickle the kaggle
+    # set in a single dump.
     print '... loading data into numpy array'
     train = numpy.loadtxt(infile, delimiter=',', skiprows=1)
     targets = train[:, 0]
@@ -32,6 +41,16 @@ def convert_csv(infile, outfile):
     cPickle.dump(train_set, f, cPickle.HIGHEST_PROTOCOL)
     cPickle.dump(valid_set, f, cPickle.HIGHEST_PROTOCOL)
     cPickle.dump(test_set, f, cPickle.HIGHEST_PROTOCOL)
+    f.close()
+
+
+def convert_unlabeled_csv_data(infile, outfile):
+    print '... loading data into numpy array'
+    test = numpy.loadtxt(infile, delimiter=',', skiprows=1)
+
+    print '... pickling test data set'
+    f = gzip.open(outfile, 'wb')
+    cPickle.dump(test, f, cPickle.HIGHEST_PROTOCOL)
     f.close()
 
 

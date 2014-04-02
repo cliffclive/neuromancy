@@ -103,3 +103,6 @@ if __name__ == '__main__':
     #mlp_classifier = sgd_optimize_mlp(dataset)
     lenet_classifier = sgd_optimize_lenet(dataset)
 
+    f = open('trained_nets/lenet5_demo.pkl')
+    cPickle.dump(lenet_classifier, f, cPickle.HIGHEST_PROTOCOL)
+    f.close()
