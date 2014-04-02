@@ -34,11 +34,13 @@ __docformat__ = 'restructedtext en'
 
 import numpy
 import theano
+import gzip
+import cPickle
 import theano.tensor as T
 
 from sgd_trainer import SGDTrainer
 from neural_net import LogisticRegression, MLP, LeNet5
-from data_pipeline import load_data
+from data_pipeline import load_data, shared_dataset
 
 
 def sgd_optimize_logreg(dataset='mnist.pkl.gz'):
@@ -75,7 +77,20 @@ def sgd_optimize_lenet(dataset='mnist.pkl.gz'):
                         image_shapes=[[28, 28], [12, 12]], batch_size=batch_size,
                         n_hidden=500, n_out=10)
 
-    datasets = load_data(dataset)
+    #datasets = load_data(dataset)
+    f = gzip.open('data/kaggle_mnist.pkl.gz', 'rb')
+    train_set = cPickle.load(f)
+    valid_set = cPickle.load(f)
+    test_set = cPickle.load(f)
+    f.close()
+
+    test_set_x, test_set_y = shared_dataset(test_set)
+    valid_set_x, valid_set_y = shared_dataset(valid_set)
+    train_set_x, train_set_y = shared_dataset(train_set)
+
+    datasets = [(train_set_x, train_set_y), (valid_set_x, valid_set_y),
+                (test_set_x, test_set_y)]
+
     trainer = SGDTrainer(classifier, datasets, learning_rate=0.01, L1_reg=0.0001,
                          L2_reg=0.001, n_epochs=100, batch_size=batch_size)
     trainer.build(x, y)
