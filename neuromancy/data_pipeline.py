@@ -113,19 +113,20 @@ def load_data(dataset):
     return rval
 
 
-def download_mnist():
-    dataset = os.path.join('data', 'mnist.pkl.gz')
+def download_dataset(filename='mnist.pkl.gz', folder='data',
+                     url='http://www.iro.umontreal.ca/~lisa/deep/data/mnist/mnist.pkl.gz'):
+    dataset = os.path.join(folder, filename)
     # Download the MNIST dataset if it is not present
     data_dir, data_file = os.path.split(dataset)
     if data_dir == "" and not os.path.isfile(dataset):
         # Check if dataset is in the data directory.
-        new_path = os.path.join(os.path.split(__file__)[0], 'data', dataset)
-        if os.path.isfile(new_path) or data_file == 'mnist.pkl.gz':
+        new_path = os.path.join(os.path.split(__file__)[0], folder, dataset)
+        if os.path.isfile(new_path) or data_file == filename:
             dataset = new_path
 
-    if (not os.path.isfile(dataset)) and data_file == 'mnist.pkl.gz':
+    if (not os.path.isfile(dataset)) and data_file == filename:
         import urllib
-        origin = 'http://www.iro.umontreal.ca/~lisa/deep/data/mnist/mnist.pkl.gz'
+        origin = url
         print 'Downloading data from %s' % origin
         urllib.urlretrieve(origin, dataset)
 
