@@ -46,11 +46,10 @@ def convert_labeled_csv_data(infile, outfile):
 
 def convert_unlabeled_csv_data(infile, outfile):
     print '... loading data into numpy array'
-    test = numpy.loadtxt(infile, delimiter=',', skiprows=1)
-
+    data = numpy.loadtxt(infile, delimiter=',', skiprows=1)
     print '... pickling test data set'
     f = gzip.open(outfile, 'wb')
-    cPickle.dump(test, f, cPickle.HIGHEST_PROTOCOL)
+    cPickle.dump(data, f, cPickle.HIGHEST_PROTOCOL)
     f.close()
 
 
@@ -64,12 +63,12 @@ def shared_dataset(data_xy, borrow=True):
     variable) would lead to a large decrease in performance.
     """
     data_x, data_y = data_xy
-    shared_x = theano.shared(numpy.asarray(data_x,
-                                           dtype=theano.config.floatX),
-                             borrow=borrow)
-    shared_y = theano.shared(numpy.asarray(data_y,
-                                           dtype=theano.config.floatX),
-                             borrow=borrow)
+    shared_x = theano.shared(
+        numpy.asarray(data_x, dtype=theano.config.floatX),
+        borrow=borrow)
+    shared_y = theano.shared(
+        numpy.asarray(data_y, dtype=theano.config.floatX),
+        borrow=borrow)
     # When storing data on the GPU it has to be stored as floats
     # therefore we will store the labels as ``floatX`` as well
     # (``shared_y`` does exactly that). But during our computations
