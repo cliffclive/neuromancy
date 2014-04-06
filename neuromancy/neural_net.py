@@ -29,6 +29,13 @@ class NeuralNet(object):
 
         self.prediction = T.argmax(self.output, axis=1)
 
+        data = T.matrix('data')
+        self.classify = theano.function(
+            inputs=[data],
+            outputs=self.prediction,
+            givens={self.input: data})
+
+
     def cost(self, y, L1_reg=0, L2_reg=0):
         """
         Uses the negative log likelihood for the cost function. This is appropriate
@@ -104,33 +111,64 @@ class MLP(NeuralNet):
     TODO: generalize this to make it easy to create an arbitrary number of
     hidden layers, of arbitrary size.
     """
-    def __init__(self, input, n_in, n_hidden, n_out):
-        hidden_layer = neural_layer.PerceptronLayer(input, n_in, n_hidden)
-        logreg_layer = neural_layer.LogisticLayer(input=hidden_layer.output,
-                                                  n_in=n_hidden, n_out=n_out)
-        super(MLP, self).__init__([hidden_layer, logreg_layer])
+    def __init__(self, input, n_in, n_out, n_hiddens=[]):
+        hidden_layers = []
+        hidden_layers.append(neural_layer.PerceptronLayer(input, n_in, n_hiddens[0]))
+        for n in range(1, len(n_hiddens)):
+            hidden_layers.append(
+                neural_layer.PerceptronLayer(hidden_layers[n-1].output, n_hiddens[n-1], n_hiddens[n]))
+
+        logreg_layer = neural_layer.LogisticLayer(input=hidden_layers[-1].output,
+                                                  n_in=n_hiddens[-1], n_out=n_out)
+        layers = hidden_layers + [logreg_layer]
+        super(MLP, self).__init__(layers)
 
 
 class LeNet5(NeuralNet):
     """
     Convolutional neural network with 2 conv/pool layers and 1 perceptron layer.
     """
-    def __init__(self, input, nkerns, filter_shapes, image_shapes, batch_size, n_hidden, n_out):
+    def __init__(self, input, nkerns, filter_shapes, image_shapes, batch_size, n_hiddens, n_out, poolsize=2):
+        cp_layers = []
+
         input0 = input.reshape((batch_size, 1, 28, 28))
-        cp_layer0 = neural_layer.LeNetConvPoolLayer(
-            input0,
+        cp_layers.append(neural_layer.LeNetConvPoolLayer(
+            input=input0,
             filter_shape=(nkerns[0], 1, filter_shapes[0][0], filter_shapes[0][1]),
             image_shape=(batch_size, 1, image_shapes[0][0], image_shapes[0][1]),
-            poolsize=(2, 2))
-        cp_layer1 = neural_layer.LeNetConvPoolLayer(
-            cp_layer0.output,
-            filter_shape=(nkerns[1], nkerns[0], filter_shapes[1][0], filter_shapes[1][1]),
-            image_shape=(batch_size, nkerns[0], image_shapes[1][0], image_shapes[1][1]),
-            poolsize=(2, 2))
-        hidden_layer = neural_layer.PerceptronLayer(input=cp_layer1.output.flatten(2),
-                                                    n_in=nkerns[1] * 4 * 4,
-                                                    n_out=n_hidden)
-        logreg_layer = neural_layer.LogisticLayer(input=hidden_layer.output,
-                                                  n_in=n_hidden, n_out=n_out)
-        super(LeNet5, self).__init__([cp_layer0, cp_layer1, hidden_layer, logreg_layer])
+            poolsize=(poolsize, poolsize)
+        ))
+        for n in range(1, len(nkerns)):
+            cp_layers.append(
+                neural_layer.LeNetConvPoolLayer(
+                    input=cp_layers[n-1].output,
+                    filter_shape=(nkerns[n], nkerns[n-1], filter_shapes[n][0], filter_shapes[n][1]),
+                    image_shape=(batch_size, nkerns[n-1], image_shapes[n][0], image_shapes[n][1]),
+                    poolsize=(poolsize, poolsize)))
+
+        hidden_layers = []
+        hidden_layers.append(neural_layer.PerceptronLayer(input=cp_layers[-1].output.flatten(2),
+                                                          n_in=nkerns[1] * 4 * 4,
+                                                          n_out=n_hiddens[0]))
+        for n in range(1, len(n_hiddens)):
+            hidden_layers.append(
+                neural_layer.PerceptronLayer(hidden_layers[n-1].output, n_hiddens[n-1], n_hiddens[n]))
+
+        logreg_layer = neural_layer.LogisticLayer(input=hidden_layers[-1].output,
+                                                  n_in=n_hiddens[-1], n_out=n_out)
+        super(LeNet5, self).__init__(cp_layers + hidden_layers + [logreg_layer])
+
+        # TODO: LeNet classifiers can only run on minibatches of size equal to the
+        # TODO: batch_size variable used to define image_shape in the first cp_layer
+        # TODO: I should write a function to break up a data set into minibatches,
+        # TODO: run the classifier function on each minibatch, and combine all the
+        # TODO: predictions back into a single array.
+        data = T.matrix('data')
+        self.classify = theano.function(
+            inputs=[data],
+            outputs=self.prediction,
+            givens={self.input: data.reshape((data.shape[0], 1,
+                                              image_shapes[0][0],
+                                              image_shapes[0][1]))})
+
 

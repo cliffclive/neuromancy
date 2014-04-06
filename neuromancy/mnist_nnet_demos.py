@@ -33,6 +33,9 @@ __docformat__ = 'restructedtext en'
 
 
 import gzip
+import numpy
+import theano
+import cPickle
 import theano.tensor as T
 
 from sgd_trainer import SGDTrainer
@@ -55,7 +58,7 @@ def sgd_optimize_mlp(datasets):
     x = T.matrix('x')    # the data is presented as rasterized images
     y = T.ivector('y')   # the labels are presented as 1D vector of [int] labels
 
-    classifier = MLP(input=x, n_in=28 * 28, n_hidden=500, n_out=10)
+    classifier = MLP(input=x, n_in=28 * 28, n_out=10, n_hiddens=[500])
 
     trainer = SGDTrainer(classifier, datasets, learning_rate=0.01, L1_reg=0.0001,
                          L2_reg=0.001, n_epochs=500, batch_size=20)
@@ -70,7 +73,7 @@ def sgd_optimize_lenet(datasets):
 
     classifier = LeNet5(input=x, nkerns=[20, 50], filter_shapes=[[5, 5], [5, 5]],
                         image_shapes=[[28, 28], [12, 12]], batch_size=batch_size,
-                        n_hidden=500, n_out=10)
+                        n_hidden=[500], n_out=10)
 
     trainer = SGDTrainer(classifier, datasets, learning_rate=0.01, L1_reg=0.0001,
                          L2_reg=0.001, n_epochs=100, batch_size=batch_size)
@@ -96,10 +99,11 @@ if __name__ == '__main__':
                 (test_set_x, test_set_y)]
 
     # TRAIN CLASSIFIER
-    #logreg_classifier = sgd_optimize_logreg(datasets)
+    logreg_classifier = sgd_optimize_logreg(datasets)
     #mlp_classifier = sgd_optimize_mlp(datasets)
-    lenet_classifier = sgd_optimize_lenet(datasets)
+    #lenet_classifier = sgd_optimize_lenet(datasets)
 
+    '''
     # SAVE TRAINED CLASSIFIER
     f = open('trained_nets/lenet5_demo.pkl')
     cPickle.dump(lenet_classifier, f, cPickle.HIGHEST_PROTOCOL)
@@ -115,27 +119,24 @@ if __name__ == '__main__':
     f = open('trained_nets/lenet5_demo.pkl', 'rb')
     classifier = cPickle.load(f)
     f.close()
+    '''
 
     # LOAD TEST DATA SET
     f = open('data/test.csv', 'r')
     data = numpy.loadtxt(f, delimiter=',', skiprows=1)
     f.close()
+    n = data.shape[0]
 
-    # COMPILE CLASSIFY FUNCTION
-    # TODO: move this into a method in the NeuralNet class
-    obs = T.matrix('obs')
-
-    classify = theano.function(
-        inputs=[obs],
-        outputs=classifier.prediction,
-        givens={classifier.input: obs.reshape((obs.shape[0], 1, 28, 28))})
-
+    '''
     # CLASSIFY THE UNLABELED DATA
     b = 500
     n = data.shape[0]
     preds = []
     for i in xrange(n / b):
         preds.append(classify(data[i*b : (i+1)*b, :]))
+    '''
+
+    preds = logreg_classifier.classify(data)
 
     output = numpy.hstack(preds)
     output = numpy.vstack((range(1, n+1), output))  # add image id's
@@ -144,4 +145,5 @@ if __name__ == '__main__':
 
     # SAVE PREDICTIONS IN A CSV FILE
     # TODO: Improve formatting: no scientific notation; include column headers
-    numpy.savetxt('data/kaggle_mnist_preds_lenet.csv', output, delimiter=',')
+    #numpy.savetxt('data/kaggle_mnist_preds_lenet.csv', output, delimiter=',')
+    numpy.savetxt('data/kaggle_mnist_preds_logreg.csv', output, delimiter=',')
