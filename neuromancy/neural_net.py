@@ -35,7 +35,6 @@ class NeuralNet(object):
             outputs=self.prediction,
             givens={self.input: data})
 
-
     def cost(self, y, L1_reg=0, L2_reg=0):
         """
         Uses the negative log likelihood for the cost function. This is appropriate
@@ -95,6 +94,10 @@ class NeuralNet(object):
         else:
             raise NotImplementedError()
 
+    # TODO: add a print function that displays the structure of the network
+    # TODO: add a print function to NeuralLayer, and have NeuralNet call the
+    # TODO: print function for each of its layers.
+
 
 class LogisticRegression(NeuralNet):
     """
@@ -124,13 +127,17 @@ class MLP(NeuralNet):
         super(MLP, self).__init__(layers)
 
 
-class LeNet5(NeuralNet):
+class LeNet(NeuralNet):
     """
     Convolutional neural network with 2 conv/pool layers and 1 perceptron layer.
     """
-    def __init__(self, input, nkerns, filter_shapes, image_shapes, batch_size, n_hiddens, n_out, poolsize=2):
-        cp_layers = []
+    def __init__(self, input, nkerns, filter_shapes, image_shapes,
+                 batch_size, n_hiddens, n_out, poolsize=2):
+        self.filter_shapes = filter_shapes
+        self.image_shapes = image_shapes
+        self.batch_size = batch_size
 
+        cp_layers = []
         input0 = input.reshape((batch_size, 1, 28, 28))
         cp_layers.append(neural_layer.LeNetConvPoolLayer(
             input=input0,
@@ -156,19 +163,30 @@ class LeNet5(NeuralNet):
 
         logreg_layer = neural_layer.LogisticLayer(input=hidden_layers[-1].output,
                                                   n_in=n_hiddens[-1], n_out=n_out)
-        super(LeNet5, self).__init__(cp_layers + hidden_layers + [logreg_layer])
+        super(LeNet, self).__init__(cp_layers + hidden_layers + [logreg_layer])
 
-        # TODO: LeNet classifiers can only run on minibatches of size equal to the
-        # TODO: batch_size variable used to define image_shape in the first cp_layer
-        # TODO: I should write a function to break up a data set into minibatches,
-        # TODO: run the classifier function on each minibatch, and combine all the
-        # TODO: predictions back into a single array.
-        data = T.matrix('data')
-        self.classify = theano.function(
-            inputs=[data],
-            outputs=self.prediction,
-            givens={self.input: data.reshape((data.shape[0], 1,
-                                              image_shapes[0][0],
-                                              image_shapes[0][1]))})
+    def classify(self, data):
+        """
+        The LeNet class is only able to classify data sets that have the same dimension
+        as the minibatches it is trained on. (I'm not exactly sure why; this is something
+        I need to investigate.)
+
+        This function will break up a data set into minibatches and reshape them to fit
+        the right dimensions, and then collect predictions for each minibatch into a single
+        array.
+        """
+        # TODO: Get this to work on data sets that have a number of observations
+        # TODO: not equal to a multiple of the minibatch size.
+        preds = []
+        n = data.shape[0]
+        for i in xrange(n / self.batch_size):
+            batch = data[i*self.batch_size : (i+1)*self.batch_size, :]
+            batch = batch.reshape((batch.shape[0], 1,
+                                   self.image_shapes[0][0],
+                                   self.image_shapes[0][1]))
+            preds.append(super(LeNet, self).classify(batch))
+
+        output = numpy.hstack(preds)
+        return output
 
 

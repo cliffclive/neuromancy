@@ -39,7 +39,7 @@ import cPickle
 import theano.tensor as T
 
 from sgd_trainer import SGDTrainer
-from neural_net import LogisticRegression, MLP, LeNet5
+from neural_net import LogisticRegression, MLP, LeNet
 from data_pipeline import load_data, shared_dataset
 
 
@@ -71,7 +71,7 @@ def sgd_optimize_lenet(datasets):
     y = T.ivector('y')   # the labels are presented as 1D vector of [int] labels
     batch_size = 500
 
-    classifier = LeNet5(input=x, nkerns=[20, 50], filter_shapes=[[5, 5], [5, 5]],
+    classifier = LeNet(input=x, nkerns=[20, 50], filter_shapes=[[5, 5], [5, 5]],
                         image_shapes=[[28, 28], [12, 12]], batch_size=batch_size,
                         n_hidden=[500], n_out=10)
 
@@ -109,13 +109,7 @@ if __name__ == '__main__':
     cPickle.dump(lenet_classifier, f, cPickle.HIGHEST_PROTOCOL)
     f.close()
 
-
     # LOAD TRAINED CLASSIFIER
-    # TODO: move this code into its own module
-    import numpy
-    import cPickle
-    import theano
-
     f = open('trained_nets/lenet5_demo.pkl', 'rb')
     classifier = cPickle.load(f)
     f.close()
@@ -138,6 +132,8 @@ if __name__ == '__main__':
 
     preds = logreg_classifier.classify(data)
 
+    # FORMAT THE PREDICTIONS IN PREPARATION FOR SAVING TO FILE
+    # TODO: put this into its own function, or a class
     output = numpy.hstack(preds)
     output = numpy.vstack((range(1, n+1), output))  # add image id's
     output = output.transpose()
