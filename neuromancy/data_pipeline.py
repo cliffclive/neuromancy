@@ -10,15 +10,17 @@ import theano.tensor as T
 
 
 def convert_labeled_csv_data(infile, outfile):
-    # Only do it this way when the data set is to big to pickle all at once,
-    # (but still small enough to pickle in three batches).
-    # This isn't the smartest approach; we still have the case where we can
-    # pickle all sets in a single tuple, and the case where each set is still
-    # to big to pickle. These require a single pickle dump, and a streaming
-    # pickle dump, respectively. Or we can just focus on three pickles and a
-    # streaming pickle. But the mnist data set from the deeplearning site is
-    # bigger than the kaggle one. So there must be a way to pickle the kaggle
-    # set in a single dump.
+    """
+    Convert labeled data from a csv file into training, validation, and test
+    data sets. Data in the csv file should have a header row, and the labels
+    should be in the first column.
+
+    Each data set is stored as a tuple of numpy arrays: (inputs, targets).
+    They are cPickled into a gzipped file.
+    """
+    # TODO: Implement this by streaming the data from one file into another.
+    # Not all data sets can be loaded into memory, converted, and stored.
+
     print '... loading data into numpy array'
     train = numpy.loadtxt(infile, delimiter=',', skiprows=1)
     targets = train[:, 0]
@@ -33,11 +35,8 @@ def convert_labeled_csv_data(infile, outfile):
     valid_set = (inputs[obs_t:obs_v, :], targets[obs_t:obs_v, ])
     test_set = (inputs[obs_v:, :], targets[obs_v:, ])
 
-    #datasets = (train_set, valid_set, test_set)
-
     print '... pickling data sets'
     f = gzip.open(outfile, 'wb')
-    #cPickle.dump(datasets, f, cPickle.HIGHEST_PROTOCOL)
     cPickle.dump(train_set, f, cPickle.HIGHEST_PROTOCOL)
     cPickle.dump(valid_set, f, cPickle.HIGHEST_PROTOCOL)
     cPickle.dump(test_set, f, cPickle.HIGHEST_PROTOCOL)
@@ -45,6 +44,13 @@ def convert_labeled_csv_data(infile, outfile):
 
 
 def convert_unlabeled_csv_data(infile, outfile):
+    """
+    Convert unlabeled data from a csv file into a test data set.
+    Data in the csv file should have a header row.
+
+    The data set is stored as a tuple of numpy arrays: (inputs, targets).
+    It is cPickled into a gzipped file.
+    """
     print '... loading data into numpy array'
     data = numpy.loadtxt(infile, delimiter=',', skiprows=1)
     print '... pickling test data set'
@@ -75,7 +81,7 @@ def shared_dataset(data_xy, borrow=True):
     # we need them as ints (we use labels as index, and if they are
     # floats it doesn't make sense) therefore instead of returning
     # ``shared_y`` we will have to cast it to int. This little hack
-    # lets ous get around this issue
+    # lets us get around this issue
     return shared_x, T.cast(shared_y, 'int32')
 
 
@@ -98,7 +104,7 @@ def load_data(dataset):
     f.close()
     #train_set, valid_set, test_set format: tuple(input, target)
     #input is an numpy.ndarray of 2 dimensions (a matrix)
-    #witch row's correspond to an example. target is a
+    #whose row's correspond to an example. target is a
     #numpy.ndarray of 1 dimensions (vector)) that have the same length as
     #the number of rows in the input. It should give the target
     #target to the example with the same index in the input.

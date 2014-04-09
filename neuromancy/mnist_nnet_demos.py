@@ -1,34 +1,23 @@
+__author__ = 'CClive'
 """
-This tutorial introduces logistic regression using Theano and stochastic
-gradient descent.
+These examples demonstrate how to build, train, save, load, and make predictions
+from neural networks built from the NeuralNet class in neural_net.py.
 
-Logistic regression is a probabilistic, linear classifier. It is parametrized
-by a weight matrix :math:`W` and a bias vector :math:`b`. Classification is
-done by projecting data points onto a set of hyperplanes, the distance to
-which is used to determine a class membership probability.
+In these samples, we use data from the MNIST data set, using data sets that can be
+downloaded from deeplearning.net, or from the digit recognizer competition on
+kaggle.com.
 
-Mathematically, this can be written as:
+Building and training the neural nets follows a simple pattern:
+    x = T.matrix('x')
+    y = T.ivector('y')
 
-.. math::
-  P(Y=i|x, W,b) &= softmax_i(W x + b) \\
-                &= \frac {e^{W_i x + b_i}} {\sum_j e^{W_j x + b_j}}
+    classifier = NeuralNet(input=x, n_in=28 * 28, n_out=10, ...)
 
-The output of the model or prediction is then done by taking the argmax of
-the vector whose i'th element is P(Y=i|x).
+    trainer = SGDTrainer(classifier, datasets, ...)
+    trainer.build(x, y)
+    return trainer.train()
 
-.. math::
-
-  y_{pred} = argmax_i P(Y=i|x,W,b)
-
-This tutorial presents a stochastic gradient descent optimization method
-suitable for large datasets, and a conjugate gradient optimization method
-that is suitable for smaller datasets.
-
-References:
-    - textbooks: "Pattern Recognition and Machine Learning" -
-                 Christopher M. Bishop, section 4.3.2
 """
-__docformat__ = 'restructedtext en'
 
 
 
@@ -69,20 +58,19 @@ def sgd_optimize_mlp(datasets):
 def sgd_optimize_lenet(datasets):
     x = T.matrix('x')    # the data is presented as rasterized images
     y = T.ivector('y')   # the labels are presented as 1D vector of [int] labels
-    batch_size = 500
 
     classifier = LeNet(input=x, nkerns=[20, 50], filter_shapes=[[5, 5], [5, 5]],
-                        image_shapes=[[28, 28], [12, 12]], batch_size=batch_size,
+                        image_shapes=[[28, 28], [12, 12]], batch_size=500,
                         n_hidden=[500], n_out=10)
 
-    trainer = SGDTrainer(classifier, datasets, learning_rate=0.01, L1_reg=0.0001,
-                         L2_reg=0.001, n_epochs=100, batch_size=batch_size)
+    trainer = SGDTrainer(classifier, datasets, learning_rate=0.01,
+                         L1_reg=0.0001, L2_reg=0.001, n_epochs=100,
+                         batch_size=classifier.batch_size)
     trainer.build(x, y)
     return trainer.train()
 
 
 if __name__ == '__main__':
-
     # PREPARE DATA SETS
     #datasets = load_data('mnist.pkl.gz')
     f = gzip.open('data/kaggle_mnist.pkl.gz', 'rb')
@@ -121,15 +109,6 @@ if __name__ == '__main__':
     f.close()
     n = data.shape[0]
 
-    '''
-    # CLASSIFY THE UNLABELED DATA
-    b = 500
-    n = data.shape[0]
-    preds = []
-    for i in xrange(n / b):
-        preds.append(classify(data[i*b : (i+1)*b, :]))
-    '''
-
     preds = logreg_classifier.classify(data)
 
     # FORMAT THE PREDICTIONS IN PREPARATION FOR SAVING TO FILE
@@ -141,5 +120,6 @@ if __name__ == '__main__':
 
     # SAVE PREDICTIONS IN A CSV FILE
     # TODO: Improve formatting: no scientific notation; include column headers
-    #numpy.savetxt('data/kaggle_mnist_preds_lenet.csv', output, delimiter=',')
     numpy.savetxt('data/kaggle_mnist_preds_logreg.csv', output, delimiter=',')
+    #numpy.savetxt('data/kaggle_mnist_preds_mlp.csv', output, delimiter=',')
+    #numpy.savetxt('data/kaggle_mnist_preds_lenet.csv', output, delimiter=',')
