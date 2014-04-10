@@ -47,7 +47,7 @@ def sgd_optimize_mlp(datasets):
     x = T.matrix('x')    # the data is presented as rasterized images
     y = T.ivector('y')   # the labels are presented as 1D vector of [int] labels
 
-    classifier = MLP(input=x, n_in=28 * 28, n_out=10, n_hiddens=[500])
+    classifier = MLP(input=x, n_in=28 * 28, n_out=10, n_hiddens=[1500])
 
     trainer = SGDTrainer(classifier, datasets, learning_rate=0.01, L1_reg=0.0001,
                          L2_reg=0.001, n_epochs=500, batch_size=20)
