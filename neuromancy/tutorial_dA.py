@@ -324,8 +324,8 @@ def test_dA(learning_rate=0.1, training_epochs=15,
                                         learning_rate=learning_rate)
 
     train_da = theano.function(
-        [index],
-        cost,
+        inputs=[index],
+        outputs=cost,
         updates=updates,
         givens={x: train_set_x[index * batch_size:(index + 1) * batch_size]})
 
