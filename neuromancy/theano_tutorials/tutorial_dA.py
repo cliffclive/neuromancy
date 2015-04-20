@@ -1,3 +1,4 @@
+# http://deeplearning.net/tutorial/code/dA.py
 """
  This tutorial introduces denoising auto-encoders (dA) using Theano.
 
@@ -37,15 +38,13 @@ import sys
 import time
 
 import numpy
+import PIL.Image
 
 import theano
 import theano.tensor as T
 from theano.tensor.shared_randomstreams import RandomStreams
-
-from tutorial_logreg import load_data
+from neuromancy.theano_tutorials.tutorial_logreg import load_data
 from utils import tile_raster_images
-
-import PIL.Image
 
 
 class dA(object):

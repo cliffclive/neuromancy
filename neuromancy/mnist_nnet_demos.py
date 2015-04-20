@@ -5,7 +5,7 @@ from neural networks built from the NeuralNet class in neural_net.py.
 
 In these samples, we use data from the MNIST data set, using data sets that can be
 downloaded from deeplearning.net, or from the digit recognizer competition on
-kaggle.com.
+kaggle.com. (link?)
 
 Building and training the neural nets follows a simple pattern:
     x = T.matrix('x')

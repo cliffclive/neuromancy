@@ -1,3 +1,4 @@
+# http://deeplearning.net/tutorial/code/mlp.py
 """
 This tutorial introduces the multilayer perceptron using Theano.
 
@@ -20,7 +21,6 @@ References:
 """
 __docformat__ = 'restructedtext en'
 
-
 import cPickle
 import gzip
 import os
@@ -31,9 +31,7 @@ import numpy
 
 import theano
 import theano.tensor as T
-
-
-from tutorial_logreg import LogisticRegression, load_data
+from neuromancy.theano_tutorials.tutorial_logreg import LogisticRegression, load_data
 
 
 class HiddenLayer(object):

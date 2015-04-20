@@ -1,3 +1,4 @@
+# http://deeplearning.net/tutorial/code/utils.py
 """ This file contains different utility functions that are not connected
 in anyway to the networks presented in the tutorials, but rather help in
 processing the outputs into a more understandable way.

@@ -1,3 +1,4 @@
+# http://deeplearning.net/tutorial/code/convolutional_mlp.py
 """This tutorial introduces the LeNet5 neural network architecture
 using Theano.  LeNet5 is a convolutional neural network, good for
 classifying images. This tutorial shows how to build the architecture,
@@ -33,8 +34,7 @@ import theano
 import theano.tensor as T
 from theano.tensor.signal import downsample
 from theano.tensor.nnet import conv
-
-from tutorial_logreg import LogisticRegression, load_data
+from neuromancy.theano_tutorials.tutorial_logreg import LogisticRegression, load_data
 from tutorial_mlp import HiddenLayer
 
 

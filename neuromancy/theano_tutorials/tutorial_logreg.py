@@ -1,3 +1,4 @@
+# http://deeplearning.net/tutorial/code/logistic_sgd.py
 """
 This tutorial introduces logistic regression using Theano and stochastic
 gradient descent.
