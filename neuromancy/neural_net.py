@@ -94,8 +94,8 @@ class NeuralNet(object):
         else:
             raise NotImplementedError()
 
-    # TODO: add a print function that displays the structure of the network
-    # TODO: add a print function to NeuralLayer, and have NeuralNet call the
+    # TODO: Add a print function that displays the structure of the network.
+    # TODO: Add a print function to NeuralLayer, and have NeuralNet call the
     # TODO: print function for each of its layers.
 
 
